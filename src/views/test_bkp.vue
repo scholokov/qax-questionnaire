@@ -1,13 +1,10 @@
 <template>
-	<div class="loader" :class="{ hide : hideLoader }">
-		Loading...
-	</div>
-	<div class="test" v-if="hideLoader">
+	<div class="test">
 		<div class="container">
 			<div class="panel">
 				<div class="panel-body">
-					<ul class="questions">
-						<li :class="{ active: currentQuestion+1 == question.question_id }" v-for="question in test.questions" :key="question">{{ question.question_id }}</li>
+					<ul class="questions" v-if="typeof test === 'object'">
+						<li v-for="(item, index) in test.questions" :class="{ 'active' : index == activeID }">{{ index + 1 }} </li>
 					</ul>
 				</div>
 			</div>
@@ -15,21 +12,21 @@
 		<div class="container">
 			<div class="panel">
 				<div class="panel-body">
-					<div>
+					<div v-if="typeof test === 'object' && test.questions != undefined">
 						<div>
-							<b>Q: {{ test.questions[currentQuestion].question_name }}</b>
+							<b>Q: {{ test.questions[activeID].question_name }}</b>
 
-							<ul class="question_options">
-								<li v-for="option in test.questions[currentQuestion].options" :key="option">
+							<ul v-if="typeof options === 'object' && options.length > 0" class="question_options">
+								<li v-for="(item, index) in options">
 									<label>
-										<input type="checkbox"> <span> {{option.name}}</span>
+										<input type="checkbox"> <span>{{ item.name }}</span>
 									</label>
 								</li>
 							</ul>
 						</div>
 						<div class="next_question">
-							<button v-on:click.stop="previousQuestion">Previous</button>
-							<button v-on:click.stop="nextQuestion" class="next">Next</button>
+							<button v-on:click="prevQuestion" v-if="activeID > 0">Previous</button>
+							<button v-on:click="nextQuestion" v-if="activeID < test.questions.length" class="next">Next</button>
 						</div>
 					</div>
 				</div>
@@ -42,11 +39,30 @@
     export default {
         name: 'Test',
         methods: {
-        	previousQuestion() {
-        		if (this.currentQuestion > 0) this.currentQuestion--;
-        	},
         	nextQuestion() {
-        		if (this.currentQuestion < this.test.questions.length) this.currentQuestion++;
+        		if (this.activeID < this.test.questions.length) this.activeID++;
+
+        		this.getQuestionOptions();
+        	},
+        	prevQuestion() {
+        		if (this.activeID > 0) this.activeID--;
+
+        		this.getQuestionOptions();
+        	},
+        	getQuestionOptions() {
+        		let id = this.test.questions[this.activeID].question_id;
+
+			  	const requestOptions = {
+				    method: "GET",
+				    headers: { "Content-Type": "application/json" }
+			  	};
+
+				fetch(`http://localhost:3000/options/${id}`, requestOptions)
+				    .then(response => response.json())
+				    .then(data => {
+				    	console.log("Data_inner", data);
+				    	this.options = data;
+				    });
         	}
         },
 		mounted() {
@@ -58,42 +74,24 @@
 			fetch(`http://localhost:3000/test/${this.$route.params.slug}`, requestOptions)
 			    .then(response => response.json())
 			    .then(data => {
-			    	console.log("Loaded");
+			    	console.log("Data", data);
 			    	this.test = data;
-			    	this.hideLoader = true;
-			    	this.currentQuestion = 0;
-
-			    	console.log(data);
+			    	this.activeID = 0;
+			    	
+					this.getQuestionOptions();
 			    });
 		},
 		data: function () {
 		    return {
-		    	currentQuestion: 0,
-		    	hideLoader: false,
-		    	test: {}
+		      test: {},
+		      activeID: 0,
+		      options: {}
 		    }
 		  }
     }
 </script>
 
 <style lang="scss">
-	.loader {
-		position: fixed;
-		top: 0;
-		left: 0;
-		right: 0;
-		bottom: 0;
-		z-index: 999;
-		background: white;
-		display: flex;
-		justify-content: center;
-		align-items: center;
-
-		&.hide {
-			display: none;
-		}
-	}
-
 	.test {
 		padding: 10px;
 
