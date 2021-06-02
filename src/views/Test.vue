@@ -7,7 +7,7 @@
 			<div class="panel">
 				<div class="panel-body">
 					<ul class="questions">
-						<li :class="{ active: currentQuestion+1 == question.question_id }" v-for="question in test.questions" :key="question">{{ question.question_id }}</li>
+						<li :class="{ active: currentQuestion+1 == question.question_id }" v-for="question in test.questions" :key="question" v-on:click="goTo(question.question_id)">{{ question.question_id }}</li>
 					</ul>
 				</div>
 			</div>
@@ -17,19 +17,23 @@
 				<div class="panel-body">
 					<div>
 						<div>
-							<b>Q: {{ test.questions[currentQuestion].question_name }}</b>
+							<b>Q: {{ current_question.question_name }}</b>
 
 							<ul class="question_options">
-								<li v-for="option in test.questions[currentQuestion].options" :key="option">
+								<li v-for="(option, index) in current_question.options" :key="option">
 									<label>
-										<input type="checkbox"> <span> {{option.name}}</span>
+										<input type="checkbox" v-model="checkedItems['box_' + current_question.question_id + '_' + option.id]" :value="'box_' + current_question.question_id + '_' + option.id"> <span> {{ option.name }}</span>
 									</label>
 								</li>
 							</ul>
 						</div>
 						<div class="next_question">
-							<button v-on:click.stop="previousQuestion">Previous</button>
-							<button v-on:click.stop="nextQuestion" class="next">Next</button>
+							<span>
+								<button v-if="currentQuestion>0" v-on:click.stop="previousQuestion">Previous</button>
+							</span>
+							<span>
+								<button v-if="currentQuestion<test.questions.length-1"  v-on:click.stop="nextQuestion" class="next">Next</button>
+							</span>
 						</div>
 					</div>
 				</div>
@@ -42,11 +46,16 @@
     export default {
         name: 'Test',
         methods: {
+        	goTo(id) {
+        		this.currentQuestion = id-1;
+        	},
         	previousQuestion() {
         		if (this.currentQuestion > 0) this.currentQuestion--;
         	},
         	nextQuestion() {
         		if (this.currentQuestion < this.test.questions.length) this.currentQuestion++;
+
+        		console.log(this.checkedItems);
         	}
         },
 		mounted() {
@@ -64,15 +73,35 @@
 			    	this.currentQuestion = 0;
 
 			    	console.log(data);
+
+			    	/*
+
+			    	for (var i = 0; i < this.test.questions.length; i++) {
+			    		let optionSlots = {};
+
+				    	for (var j = 0; j < this.test.questions.options.length; j++) {
+				    		optionSlots[this.test.questions.options.id] = 0;
+				    	}
+
+
+			    	}*/
 			    });
 		},
 		data: function () {
 		    return {
+		    	answers: [],
 		    	currentQuestion: 0,
 		    	hideLoader: false,
-		    	test: {}
+		    	test: {},
+		    	checkedItems: []
 		    }
-		  }
+	  	},
+		computed: {
+		    // a computed getter
+		    current_question: function () {
+		      return this.test.questions[this.currentQuestion];
+		    }
+		}
     }
 </script>
 
@@ -99,6 +128,7 @@
 
 		.container {
 			width: 900px;
+			max-width: calc(100% - 30px);
 			margin: auto;
 		}
 
@@ -120,6 +150,7 @@
 				margin: 0 5px 0 0;
         		background: #e0e0e0;
 		      	border:1px solid #cacaca;
+		      	cursor: pointer;
 
 		      	&.active {
 		      		background: #d2d2d2;
