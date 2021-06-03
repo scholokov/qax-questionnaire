@@ -30,7 +30,32 @@
         methods: {
             login() {
                 if(this.input.username != "" && this.input.password != "") {
-                	console.log("hi")
+				  	const requestOptions = {
+					    method: "POST",
+					    headers: {
+					      'Accept': 'application/json',
+					      'Content-Type': 'application/json'
+					    },
+					    body: JSON.stringify({
+					    	username: this.input.username,
+					    	password: this.input.password
+					    })
+				  	};
+
+			    	console.log("Sending: ", requestOptions);
+
+					fetch(`http://localhost:3000/auth`, requestOptions)
+					    .then(response => response.json())
+					    .then(data => {
+					    	console.log("Sent");
+
+					    	if (data.success == 1 && data.token) {
+					    		//save token
+					    		sessionStorage.setItem('authenticated', data.token);
+
+					    		this.$router.push({ name: 'area' })
+					    	}
+					    });
                 }
                 else {
                     console.log("A username and password must be present");
