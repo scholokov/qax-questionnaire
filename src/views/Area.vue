@@ -22,7 +22,10 @@
 							<a>New test</a>
 						</div>
 						<div>
-							<a>New user</a>
+							<router-link to="/newuser">New user</router-link>
+						</div>
+						<div>
+							<router-link to="/logout">Logout</router-link>
 						</div>
 					</div>
 				</div>

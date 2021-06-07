@@ -24,6 +24,16 @@ const routes = [
     path: '/area',
     name: 'area',
     component: () => import('../views/Area.vue')
+  },
+  {
+    path: '/newuser',
+    name: 'newuser',
+    component: () => import('../views/NewUser.vue')
+  },
+  {
+    path: '/logout',
+    name: 'logout',
+    component: () => import('../views/Logout.vue')
   }
 ]
 

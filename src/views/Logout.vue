@@ -4,10 +4,7 @@
       <div class="main">
         <div class="panel">
           <div class="panel-body">
-            <div id="nav">
-              <router-link to="/">Home</router-link> |
-              <router-link to="/login">Login</router-link>
-            </div>
+            <h3>Logging out...</h3>
           </div>
         </div>
       </div>
@@ -18,17 +15,40 @@
 <script>
 
 export default {
-  name: 'Home'
+  name: 'Logout',
+  mounted() {
+    sessionStorage.removeItem('authenticated');
+
+    this.$router.push({ name: 'login' });
+  }
 }
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
   h1, h2, h3 {
     margin: 0px;
   }
 
+  .text-center {
+    padding: 10px;
+    text-align: center;
+  }
+
   hr {
     border: 1px solid #dedede;
+  }
+
+  .verform {
+    display: flex;
+    flex-direction: column;
+
+    input {
+      margin-bottom: 10px;
+    }
+
+    &>input:last-child {
+      margin-bottom: 0px;;
+    }
   }
 
   .area {
@@ -49,7 +69,7 @@ export default {
   }
 
   .container {
-    width: 900px;
+    width: 400px;
     max-width: calc(100% - 30px);
     margin: auto;
   }
