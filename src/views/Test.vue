@@ -1,6 +1,9 @@
 <template>
 	<div class="loader" :class="{ hide : hideLoader }">
-		Loading...
+		<div v-if="testDone">
+			The test is complete!
+		</div>
+		<div v-else>Loading...</div>
 	</div>
 	<div class="test" v-if="hideLoader">
 		<div class="container">
@@ -33,6 +36,7 @@
 							</span>
 							<span>
 								<button v-if="currentQuestion<test.questions.length-1"  v-on:click.stop="nextQuestion" class="next">Next</button>
+								<button v-else  v-on:click.stop="submitAnswers" class="next">Submit</button>
 							</span>
 						</div>
 					</div>
@@ -56,6 +60,42 @@
         		if (this.currentQuestion < this.test.questions.length) this.currentQuestion++;
 
         		console.log(this.checkedItems);
+        	},
+        	submitAnswers() {
+        		let userToken = sessionStorage.getItem('authenticated');
+        		//check if all questions are answered
+        		let submitObject = {
+        			"student" : userToken,
+        			"test_id" : this.test.test_id,
+        			"answers" : {}
+        		};
+
+        		for(let answer in this.checkedItems) {
+        			let props = answer.split("_");
+
+        			console.log(typeof submitObject.answers[props[1]]);
+
+        			if (typeof submitObject.answers[props[1]] == "object") {
+        				submitObject.answers[props[1]].push(props[2]);
+        			}
+        			else {
+        				submitObject.answers[props[1]] = [props[2]];
+        			}
+        		}
+
+			  	const requestOptions = {
+				    method: "POST",
+				    headers: { "Content-Type": "application/json" },
+			        body: JSON.stringify(submitObject)
+			  	};
+
+				fetch(`http://localhost:3000/answer`, requestOptions)
+				    .then(response => response.json())
+				    .then(data => {
+				    	console.log("Submitted!", data);
+				    	this.hideLoader = false;
+				    	this.testDone = true;
+				    });
         	}
         },
 		mounted() {
@@ -92,6 +132,7 @@
 		    	answers: [],
 		    	currentQuestion: 0,
 		    	hideLoader: false,
+		    	testDone: false,
 		    	test: {},
 		    	checkedItems: []
 		    }
@@ -100,6 +141,9 @@
 		    // a computed getter
 		    current_question: function () {
 		      return this.test.questions[this.currentQuestion];
+		    },
+		    example_prop: function() {
+		    	return "hi!";
 		    }
 		}
     }
