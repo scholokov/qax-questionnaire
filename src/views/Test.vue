@@ -10,7 +10,7 @@
 			<div class="panel">
 				<div class="panel-body">
 					<ul class="questions">
-						<li :class="{ active: currentQuestion+1 == question.question_id }" v-for="question in test.questions" :key="question" v-on:click="goTo(question.question_id)">{{ question.question_id }}</li>
+						<li :class="{ active: currentQuestion+1 == question.question_id }" v-for="(question, i) in test.questions" :key="question" v-on:click="goTo(i)">{{ i+1 }}</li>
 					</ul>
 				</div>
 			</div>
@@ -51,7 +51,7 @@
         name: 'Test',
         methods: {
         	goTo(id) {
-        		this.currentQuestion = id-1;
+        		this.currentQuestion = id;
         	},
         	previousQuestion() {
         		if (this.currentQuestion > 0) this.currentQuestion--;

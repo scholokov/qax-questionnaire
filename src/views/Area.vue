@@ -19,7 +19,7 @@
 						<h3>Actions</h3>
 						<hr>
 						<div>
-							<a>New test</a>
+							<router-link to="/newtest">New test</router-link>
 						</div>
 						<div>
 							<router-link to="/newuser">New user</router-link>
